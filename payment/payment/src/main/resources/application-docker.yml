@@ -1,0 +1,54 @@
+# payment-service/src/main/resources/application.yml
+spring:
+  application:
+    name: payment
+  datasource:
+    url: jdbc:h2:mem:test
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: create
+  cloud:
+    function:
+      definition: processOrder
+    stream:
+      function:
+        definition: processOrder
+      bindings:
+        processOrder-in-0:
+          destination: order.exchange
+          group: payment-group
+          content-type: application/json
+        publishPayment-out-0:
+          destination: payment.exchange
+          content-type: application/json
+        paymentAlerts-out-0:
+          destination: payment.alerts
+          content-type: application/json
+      kafka:
+        binder:
+          brokers: kafka:9092
+        bindings:
+          processOrder-in-0:
+            consumer:
+              enable-dlq: true
+              dlq-name: payment.dlq
+              dlq-partitions: 1
+              autoCommitOffset: true
+        # bean name must match the function bean below (processOrder)
+
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: prometheus
+
+
+server:
+  port: 8087
+
+# keep your existing JPA/H2 config as you had
+
+
