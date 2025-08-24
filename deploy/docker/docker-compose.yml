@@ -1,53 +1,4 @@
 services:
-#  postgres:
-#    container_name: postgres_container
-#    image: postgres:14
-#
-#    environment:
-#      POSTGRES_USER: admin
-#      POSTGRES_PASSWORD: admin
-#      PGDATA: /data/postgres
-#
-#    volumes:
-#      - postgres:/data/postgres
-#      #- ./init-multi-db.sql:/docker-entrypoint-initdb.d/init.sql
-#
-#
-#    ports:
-#      - "5432:5432"
-#    networks:
-#      - backend
-#    restart: unless-stopped
-#
-#  pgadmin:
-#    container_name: pgadmin_container
-#    image: dpage/pgadmin4
-#
-#    environment:
-#      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-pgadmin4@pgadmin.org}
-#      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
-#      PGADMIN_CONFIG_SERVER_MODE: 'False'
-#    volumes:
-#      - pgadmin:/var/lib/pgadmin
-#    ports:
-#      - "5050:80"
-#    networks:
-#      - backend
-#    restart: unless-stopped
-#
-#  rabbitmq:
-#    container_name: rabbitmq
-#    image: rabbitmq:3-management
-#    environment:
-#      RABBITMQ_DEFAULT_USER: guest
-#      RABBITMQ_DEFAULT_PASS: guest
-#    ports:
-#      - "5672:5672"       # Message broker
-#      - "15672:15672"     # Management UI (http://localhost:15672)
-#    networks:
-#      - backend
-#    restart: unless-stopped
-
   zookeeper:
     image: confluentinc/cp-zookeeper:7.5.0
     container_name: zookeeper
@@ -68,31 +19,11 @@ services:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
-#      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:29092,PLAINTEXT_INTERNAL://kafka:9092
-      #KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_INTERNAL:PLAINTEXT
-      #KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT_INTERNAL
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
     depends_on:
       - zookeeper
     networks:
       - backend
-
-#  zipkin:
-#    image: openzipkin/zipkin
-#    container_name: zipkin
-#    ports:
-#      - 9411:9411
-#    environment:
-#      - SERVER_ADDRESS=0.0.0.0
-#    volumes:
-#      - zipkin-data:/data   # persistent storage for spans
-#    healthcheck:
-#      test: [ "CMD", "curl", "-f", "http://localhost:9411/health" ]
-#      interval: 5s
-#      retries: 5
-#    networks:
-#      - backend
-#      - loki
 
   zipkin:
     image: openzipkin/zipkin:latest
@@ -114,157 +45,21 @@ services:
       - backend
       - loki
 
-
-  #  configserver:
-#    build: ../../../configserver/configserver
-#    #image: ecom/config-server
-#    container_name: configserver
-#    ports:
-#      - 8888:8888
-#    networks:
-#      - backend
-#    environment:
-#      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka:8761/eureka
-#      - SPRING_CLOUD_CONFIG_SERVER_NATIVE_SEARCH_LOCATIONS=/config
-#      - RABBITMQ_HOST=rabbitmq
-#      - RABBITMQ_PORT=5672
-#      - RABBITMQ_USERNAME=guest
-#      - RABBITMQ_PASSWORD=guest
-#      - RABBITMQ_VHOST=/
-#    depends_on:
-#      - eureka
-#    volumes:
-#      - ../../configserver/configserver/src/main/resources/config:/config
-#    healthcheck:
-#      test: [ "CMD","wget","--spider", "http://localhost:8761/actuator/health" ]
-#      interval: 10s
-#      timeout: 5s
-#      retries: 5
-
-#  eureka:
-#    build: ../../../eureka/eureka
-#    #image: ecom/eureka
-#    container_name: eureka
-#    ports:
-#      - 8761:8761
-#    networks:
-#      - backend
-#    healthcheck:
-#      test: ["CMD","wget","--spider", "http://localhost:8761/actuator/health"]
-#      interval: 10s
-#      timeout: 5s
-#      retries: 5
-
-#  apigateway:
-#    build: ../../../apigateway/apigateway
-#    #image: ecom/apigateway
-#    container_name: apigateway
-#    ports:
-#      - 8080:8080
-#    environment:
-#      - SPRING_PROFILES_ACTIVE=docker
-#      - SERVICE_PRODUCT-URL=http://product:8081
-#      - SERVICE_USER-URL=http://user:8082
-#      - SERVICE_ORDER-URL=http://order:8083
-#      - KAFKA_BROKER=http://localhost:9092
-#      - SERVICE_EUREKA-URL=http://eureka:8761
-#      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka:8761/eureka
-#      - MONGO_URI=mongodb+srv://ritikagrawal047:KxMjlbu5LYdO9hr7@microserviceuser.zoauyds.mongodb.net/?retryWrites=true&w=majority&appName=microserviceUser
-#      - SPRING_DATA_MONGODB_DATABASE=userdb
-#      - RABBITMQ_HOST=hawk.rmq.cloudamqp.com
-#      - RABBITMQ_PORT=5671
-#      - RABBITMQ_USERNAME=pklhfuyj
-#      - RABBITMQ_PASSWORD=cNh_sOMiMZ5UJrlkpeTJ_NcGY-mfiX__
-#      - RABBITMQ_VHOST=pklhfuyj
-#    depends_on:
-#      - rabbitmq
-#      - eureka
-#      - keycloak
-#      - configserver
-#    networks:
-#      - backend
-#
-
-
-#  user:
-#    build: ../../../user/user
-#    #   image: ecom/user
-#    container_name: user
-#    ports:
-#      - 8082:8082
-#    environment:
-#      - SPRING_ZIPKIN_BASE_URL=http://zipkin:9411
-#      - SPRING_PROFILES_ACTIVE=docker
-#      - MONGO_URI=mongodb+srv://ritikagrawal047:KxMjlbu5LYdO9hr7@microserviceuser.zoauyds.mongodb.net/?retryWrites=true&w=majority&appName=microserviceUser
-#      - SPRING_DATA_MONGODB_DATABASE=userdb
-#      - ZIPKIN_URL=http://zipkin:9411/api/v2/spans
-#      - RABBITMQ_HOST=hawk.rmq.cloudamqp.com
-#      - RABBITMQ_PORT=5671
-#      - RABBITMQ_USERNAME=pklhfuyj
-#      - RABBITMQ_PASSWORD=cNh_sOMiMZ5UJrlkpeTJ_NcGY-mfiX__
-#      - RABBITMQ_VHOST=pklhfuyj
-#    depends_on:
-#      - rabbitmq
-#      - eureka
-#      - keycloak
-#      - configserver
-#    networks:
-#      - backend
-#
-#
-#  product:
-#    build: ../../../product/product
-#    # image: ecom/product
-#    container_name: product
-#    ports:
-#      - 8081:8081
-#    environment:
-#      - SPRING_PROFILES_ACTIVE=docker
-#      - DB_USER=admin
-#      - DB_PASSWORD=admin
-#      - RABBITMQ_HOST=hawk.rmq.cloudamqp.com
-#      - ZIPKIN_URL=http://zipkin:9411/api/v2/spans
-#      - RABBITMQ_PORT=5671
-#      - RABBITMQ_USERNAME=pklhfuyj
-#      - RABBITMQ_PASSWORD=cNh_sOMiMZ5UJrlkpeTJ_NcGY-mfiX__
-#      - RABBITMQ_VHOST=pklhfuyj
-#    depends_on:
-#      - rabbitmq
-#      - eureka
-#      - keycloak
-#      - configserver
-#    networks:
-#      - backend
-
   order:
     build: ../../order/order
-    #image: dlq/order-service
     container_name: order
     ports:
       - 8083:8083
-
     environment:
       - SPRING_PROFILES_ACTIVE=docker
-      - DB_USER=admin
-      - DB_PASSWORD=admin
+      - DB_USER=
+      - DB_PASSWORD=
       - SPRING_APPLICATION_NAME=order
-#      - ZIPKIN_URL=http://zipkin:9411/api/v2/spans
-#      - SPRING_ZIPKIN_BASE_URL=http://zipkin:9411/
       - KAFKA_BROKER=http://kafka:9092
       - SPRING_TRACING_SAMPLER_PROBABILITY=1.0
       - SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS=kafka:9092
       - MANAGEMENT_ZIPKIN_TRACING_ENDPOINT=http://zipkin:9411/api/v2/spans
       - MANAGEMENT_TRACING_SAMPLER_PROBABILITY=1.0
-    #      - RABBITMQ_HOST=hawk.rmq.cloudamqp.com
-    #      - RABBITMQ_PORT=5671
-    #      - RABBITMQ_USERNAME=pklhfuyj
-    #      - RABBITMQ_PASSWORD=cNh_sOMiMZ5UJrlkpeTJ_NcGY-mfiX__
-    #      - RABBITMQ_VHOST=pklhfuyj
-#    depends_on:
-#      #      - rabbitmq
-#      - eureka
-#      - keycloak
-#      - configserver
     depends_on:
       zipkin:
         condition: service_healthy
@@ -272,72 +67,32 @@ services:
       - backend
 
   notification:
-    #build: ../../notification/notification
     image: dlq/notification-service
     container_name: notification
     ports:
       - 8084:8084
     environment:
       - SPRING_PROFILES_ACTIVE=docker
-      - DB_USER=admin
-      - DB_PASSWORD=admin
-      - SPRING_APPLICATION_NAME=order
+      - DB_USER=
+      - DB_PASSWORD=
+      - SPRING_APPLICATION_NAME=notification
       - SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS=kafka:9092
-    #      - RABBITMQ_HOST=hawk.rmq.cloudamqp.com
-    #      - RABBITMQ_PORT=5671
-    #      - RABBITMQ_USERNAME=pklhfuyj
-    #      - RABBITMQ_PASSWORD=cNh_sOMiMZ5UJrlkpeTJ_NcGY-mfiX__
-    #      - RABBITMQ_VHOST=pklhfuyj
-#    depends_on:
-#      #      - rabbitmq
-#      - eureka
-#      - keycloak
-#      - configserver
     networks:
       - backend
 
   payment:
-    #build: ../../payment/payment
     image: dlq/payment-service
     container_name: payment
     ports:
       - 8087:8087
     environment:
       - SPRING_PROFILES_ACTIVE=docker
-      - DB_USER=admin
-      - DB_PASSWORD=admin
-      - SPRING_APPLICATION_NAME=order
+      - DB_USER=
+      - DB_PASSWORD=
+      - SPRING_APPLICATION_NAME=payment
       - SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS=kafka:9092
-    #      - RABBITMQ_HOST=hawk.rmq.cloudamqp.com
-    #      - RABBITMQ_PORT=5671
-    #      - RABBITMQ_USERNAME=pklhfuyj
-    #      - RABBITMQ_PASSWORD=cNh_sOMiMZ5UJrlkpeTJ_NcGY-mfiX__
-    #      - RABBITMQ_VHOST=pklhfuyj
-    #depends_on:
-      #      - rabbitmq
-#      - eureka
-#      - keycloak
-#      - configserver
     networks:
       - backend
-
-
-
-
-#  keycloak:
-#    container_name: keycloak
-#    image: quay.io/keycloak/keycloak:26.3.2
-#    ports:
-#      - "8443:8080"
-#    environment:
-#      KC_BOOTSTRAP_ADMIN_USERNAME: admin
-#      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
-#    #      PROXY_ADDRESS_FORWARDING: "true"
-#    #      KEYCLOAK_FRONTEND_URL: "http://localhost:8443"
-#    command: [ "start-dev" ]
-#    networks:
-#      - backend
-
 
   read:
     image: grafana/loki:latest
@@ -403,8 +158,8 @@ services:
         mkdir -p /data/loki-ruler && \
         minio server /data
     environment:
-      - MINIO_ROOT_USER=loki
-      - MINIO_ROOT_PASSWORD=supersecret
+      - MINIO_ROOT_USER=
+      - MINIO_ROOT_PASSWORD=
       - MINIO_PROMETHEUS_AUTH_TYPE=public
       - MINIO_UPDATE=off
     ports:
@@ -437,10 +192,10 @@ services:
       - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
       - GF_SMTP_ENABLED=true
       - GF_SMTP_HOST=smtp.gmail.com:587
-      - GF_SMTP_USER=ritikagrawal047@gmail.com
-      - GF_SMTP_PASSWORD=ydhu iynr cahq fydq
-      - GF_SMTP_FROM_ADDRESS=ritikagrawal047@gmail.com
-      - GF_SMTP_FROM_NAME=Grafana
+      - GF_SMTP_USER=
+      - GF_SMTP_PASSWORD=
+      - GF_SMTP_FROM_ADDRESS=
+      - GF_SMTP_FROM_NAME=
       - GF_SMTP_SKIP_VERIFY=false
     depends_on:
       - loki-gateway
@@ -487,7 +242,6 @@ services:
     networks:
       - loki
 
-
   loki-gateway:
     image: nginx:latest
     depends_on:
@@ -499,7 +253,7 @@ services:
       - |
         cat <<EOF > /etc/nginx/nginx.conf
         user  nginx;
-        worker_processes  5;  ## Default: 1
+        worker_processes  5;
 
         events {
           worker_connections   1000;
@@ -557,13 +311,11 @@ services:
     networks:
       - loki
 
-
   flog:
     image: mingrammer/flog
     command: -f json -d 200ms -l
     networks:
       - loki
-
 
 networks:
   backend:
@@ -576,5 +328,3 @@ volumes:
   pgadmin:
   zipkin-data:
     driver: local
-
-
